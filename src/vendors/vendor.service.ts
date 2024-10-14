@@ -10,16 +10,24 @@ export class VendorService {
   constructor(@InjectModel(Vendor.name) private vendorModel: Model<Vendor>) {}
 
   async create(createVendorDto: CreateVendorDto): Promise<Vendor> {
+    const vendor = await this.vendorModel.findOne({ name: createVendorDto.name });
+    if (vendor) throw new NotFoundException('Vendor already exists');
+  
     const newVendor = new this.vendorModel(createVendorDto);
     return newVendor.save();
   }
 
   async findAll(): Promise<Vendor[]> {
-    return this.vendorModel.find().populate('products').exec();
+    return this.vendorModel.find().populate({path:"products", select: ["name"]}).exec();
   }
 
   async findOne(id: string): Promise<Vendor> {
-    const vendor = await this.vendorModel.findById(id).populate('products').exec();
+    const vendor = await this.vendorModel
+      .findById(id)
+      .populate({ path: 'products', select: ['name'] })
+      .exec();
+
+    console.log(vendor);
     if (!vendor) throw new NotFoundException('Vendor not found');
     return vendor;
   }
