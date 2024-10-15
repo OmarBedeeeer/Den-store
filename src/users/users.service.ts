@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
+import {Cart} from "../schemas/cart.schema";
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcryptjs';
@@ -10,13 +11,20 @@ import { LoginUserDto } from './dtos/login-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>,
+  @InjectModel(Cart.name) private cartModel: Model<Cart>) {}
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userModel.findOne({ email: createUserDto.email });
     if (existingUser) throw new NotFoundException('User already exists');
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password,Number(process.env.SALT_ROUNDS));
+
+    const newCart = new this.cartModel({});
+    const savedCart = await newCart.save();
+    
     createUserDto.password = hashedPassword;
-    const newUser = new this.userModel(createUserDto);
+    const newUser = new this.userModel({...createUserDto, cart: savedCart._id});
+    await newUser.populate('cart')
+
     return newUser.save();
   }
   //no Auth Yet
@@ -45,7 +53,12 @@ export class UserService {
   }
 
   async remove(id: string): Promise<User> {
+    const userCart = await this.cartModel.findOne({cart: id});
+    if (userCart) {
+      await this.cartModel.findByIdAndDelete(userCart._id);
+    }
     const user = await this.userModel.findByIdAndDelete(id);
+    console.log(user);
     if (!user) throw new NotFoundException('User not found');
     return user;
   }

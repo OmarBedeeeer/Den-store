@@ -26,8 +26,6 @@ export class VendorService {
       .findById(id)
       .populate({ path: 'products', select: ['name'] })
       .exec();
-
-    console.log(vendor);
     if (!vendor) throw new NotFoundException('Vendor not found');
     return vendor;
   }

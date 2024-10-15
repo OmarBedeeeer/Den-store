@@ -1,4 +1,4 @@
-import { IsString , IsNumber ,IsBoolean , IsArray , IsEmail , } from "class-validator";
+import { IsString , IsNumber  , IsArray , IsEmail, IsMongoId , } from "class-validator";
 
 export class CreateUserDto {
     @IsString()
@@ -22,4 +22,7 @@ export class CreateUserDto {
     @IsArray()
     address: string
 
+    
+  @IsMongoId()
+  cart: string;
 }

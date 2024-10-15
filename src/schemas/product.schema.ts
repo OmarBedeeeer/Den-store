@@ -4,7 +4,7 @@ import { Vendor } from './vendor.schema';
 
 export type productDocument = Product & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Product extends Document {
   @Prop({ required: true })
   name: string;
@@ -19,10 +19,8 @@ export class Product extends Document {
   description: string;
 
   @Prop({ default: 0 })
-  stock: number;
+  quantity: number;
 
-  @Prop({ default: Date.now })
-  createdAt: Date;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

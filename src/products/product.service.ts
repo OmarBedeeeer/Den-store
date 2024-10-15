@@ -5,12 +5,14 @@ import { Product, productDocument } from '../schemas/product.schema';
 import { CreateProductDto } from './dtos/create-product.dto';
 import {UpdateProductDto} from "./dtos/update-product.dto";
 import { Vendor } from 'src/schemas/vendor.schema';
+import { Cart } from 'src/schemas/cart.schema';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<Product> ,
-    @InjectModel(Vendor.name) private vendorModel: Model<Vendor>
+    @InjectModel(Vendor.name) private vendorModel: Model<Vendor>,
+    @InjectModel(Cart.name) private cartModel: Model<Cart>
 ) {}
 
 async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -49,7 +51,6 @@ async create(createProductDto: CreateProductDto): Promise<Product> {
     
     return updatedProduct;
   }
-
 
   async remove(id: string): Promise<Product> {
     const product = await this.productModel.findByIdAndDelete(id);
